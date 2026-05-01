@@ -1,0 +1,430 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Terminal, Server, Cloud, Github, Linkedin, Mail, Phone, 
+  MapPin, Activity, Cpu, Network, Code, Layers, ShieldCheck, 
+  ChevronRight, ExternalLink, Send
+} from 'lucide-react';
+
+// --- Custom Hooks ---
+
+// Typing Animation Hook
+const useTypewriter = (words, typingSpeed = 50, deletingSpeed = 30, pauseTime = 2000) => {
+  const [text, setText] = useState('');
+  const [wordIndex, setWordIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    let timer;
+    const currentWord = words[wordIndex];
+
+    if (isDeleting) {
+      timer = setTimeout(() => {
+        setText(currentWord.substring(0, text.length - 1));
+        if (text.length === 0) {
+          setIsDeleting(false);
+          setWordIndex((prev) => (prev + 1) % words.length);
+        }
+      }, deletingSpeed);
+    } else {
+      timer = setTimeout(() => {
+        setText(currentWord.substring(0, text.length + 1));
+        if (text.length === currentWord.length) {
+          setTimeout(() => setIsDeleting(true), pauseTime);
+        }
+      }, typingSpeed);
+    }
+    return () => clearTimeout(timer);
+  }, [text, isDeleting, wordIndex, words, typingSpeed, deletingSpeed, pauseTime]);
+
+  return text;
+};
+
+// Scroll Reveal Hook
+const useScrollReveal = () => {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, isVisible];
+};
+
+// --- Components ---
+
+// Animated Neon Background
+const AnimatedBackground = () => (
+  <div className="fixed inset-0 z-[-1] overflow-hidden bg-[#05050A]">
+    <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] rounded-full bg-cyan-600/10 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
+    <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-700/10 blur-[150px] animate-pulse" style={{ animationDuration: '12s' }} />
+    <div className="absolute top-[30%] left-[40%] w-[30vw] h-[30vw] rounded-full bg-blue-600/10 blur-[100px] animate-pulse" style={{ animationDuration: '10s' }} />
+    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 mix-blend-overlay"></div>
+  </div>
+);
+
+// Glassmorphism Wrapper for Sections
+const GlassSection = ({ children, className = '', id = '' }) => {
+  const [ref, isVisible] = useScrollReveal();
+  return (
+    <section 
+      id={id}
+      ref={ref} 
+      className={`transition-all duration-1000 ease-out transform ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+      } max-w-6xl mx-auto px-6 py-20 ${className}`}
+    >
+      {children}
+    </section>
+  );
+};
+
+// Terminal Header Component
+const TerminalHeader = () => (
+  <div className="flex items-center gap-2 px-4 py-2 bg-slate-900/80 rounded-t-xl border-b border-white/5">
+    <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+    <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+    <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+    <span className="ml-2 text-xs text-slate-500 font-mono">bash -- ~</span>
+  </div>
+);
+
+// Main App
+export default function App() {
+  const typeWriterText = useTypewriter([
+    "Automating Infrastructure",
+    "Building CI/CD Pipelines",
+    "Scaling Cloud Systems",
+    "Engineering Reliability"
+  ], 60, 40, 2500);
+
+  const skills = [
+    { name: 'Linux', icon: <Terminal size={20} />, category: 'Core' },
+    { name: 'Networking', icon: <Network size={20} />, category: 'Core' },
+    { name: 'Git & GitLab', icon: <Github size={20} />, category: 'VCS / CI' },
+    { name: 'Jenkins', icon: <Layers size={20} />, category: 'CI/CD' },
+    { name: 'Docker', icon: <Server size={20} />, category: 'Containers' },
+    { name: 'Kubernetes', icon: <Activity size={20} />, category: 'Orchestration' },
+    { name: 'AWS', icon: <Cloud size={20} />, category: 'Cloud' },
+    { name: 'Microsoft Azure', icon: <Cloud size={20} />, category: 'Cloud' },
+    { name: 'Ansible', icon: <Cpu size={20} />, category: 'Config Mgt' },
+    { name: 'IaC', icon: <Code size={20} />, category: 'Infrastructure' },
+    { name: 'Python', icon: <Terminal size={20} />, category: 'Scripting' },
+    { name: 'Bash Scripting', icon: <Terminal size={20} />, category: 'Scripting' },
+    { name: 'YAML', icon: <Code size={20} />, category: 'Config' }
+  ];
+
+  const projects = [
+    {
+      title: "Automated Microservices Pipeline",
+      problem: "Manual deployments causing downtime and inconsistent environments.",
+      stack: ["Jenkins", "Docker", "GitLab", "Bash"],
+      outcome: "Reduced deployment time by 40% and achieved zero-downtime rolling updates.",
+      link: "#"
+    },
+    {
+      title: "Cloud Infrastructure as Code",
+      problem: "Inconsistent server provisioning leading to configuration drift.",
+      stack: ["AWS", "IaC", "Ansible", "YAML"],
+      outcome: "Automated VPC, EC2, and RDS provisioning in under 5 minutes.",
+      link: "#"
+    },
+    {
+      title: "High-Availability K8s Cluster",
+      problem: "Lack of scalability for containerized workloads.",
+      stack: ["Kubernetes", "Linux", "Networking"],
+      outcome: "Deployed a multi-node cluster ensuring 99.9% application uptime locally.",
+      link: "#"
+    },
+    {
+      title: "System Monitoring & Alerting",
+      problem: "No visibility into server health causing blind spots during outages.",
+      stack: ["Linux", "Python", "Networking"],
+      outcome: "Implemented automated health checks and metrics collection.",
+      link: "#"
+    },
+    {
+      title: "GitLab CI Security Scanning",
+      problem: "Vulnerable code reaching production environments.",
+      stack: ["GitLab CI", "Python", "Docker"],
+      outcome: "Blocked 100% of faulty or insecure code merges using automated pipeline checks.",
+      link: "#"
+    },
+    {
+      title: "Server Configuration Automation",
+      problem: "Time-consuming manual setup of web and database servers.",
+      stack: ["Ansible", "Linux", "Bash"],
+      outcome: "Standardized configuration across 10+ servers with a single command.",
+      link: "#"
+    }
+  ];
+
+  return (
+    <div className="min-h-screen text-slate-300 font-sans selection:bg-cyan-500/30 selection:text-cyan-100">
+      <AnimatedBackground />
+
+      {/* Navbar */}
+      <nav className="fixed top-0 w-full z-50 bg-[#05050A]/70 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="text-xl font-bold font-mono tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+            MF<span className="text-slate-500">_</span>
+          </div>
+          <div className="hidden md:flex gap-6 text-sm font-medium text-slate-400">
+            <a href="#about" className="hover:text-cyan-400 transition-colors">About</a>
+            <a href="#skills" className="hover:text-cyan-400 transition-colors">Skills</a>
+            <a href="#projects" className="hover:text-cyan-400 transition-colors">Projects</a>
+            <a href="#contact" className="hover:text-cyan-400 transition-colors">Contact</a>
+          </div>
+        </div>
+      </nav>
+
+      <main className="pt-24 pb-12">
+        {/* HERO SECTION */}
+        <section className="min-h-[85vh] flex items-center justify-center relative px-6">
+          <div className="max-w-4xl mx-auto text-center z-10 relative">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-950/40 border border-cyan-500/20 text-cyan-400 text-xs font-mono mb-8 animate-fade-in-up">
+              <Activity size={14} className="animate-pulse" />
+              <span>System Status: Online & Ready</span>
+            </div>
+            
+            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-4 text-white">
+              Muhammad <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 drop-shadow-[0_0_15px_rgba(34,211,238,0.4)]">Furqan</span>
+            </h1>
+            
+            <div className="text-xl md:text-2xl font-mono text-slate-400 mb-8 h-8 flex items-center justify-center gap-2">
+              <ChevronRight className="text-cyan-500" />
+              <span>{typeWriterText}</span><span className="w-2 h-6 bg-cyan-500 animate-pulse"></span>
+            </div>
+            
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+              Fresh DevOps Engineer with a foundational focus on <strong className="text-slate-200">CI/CD automation</strong>, 
+              <strong className="text-slate-200"> cloud infrastructure</strong>, and <strong className="text-slate-200">reliability engineering</strong>. 
+              Translating automation-first thinking into scalable, secure deployments.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <a href="#projects" className="group relative px-6 py-3 font-semibold text-white bg-slate-800 rounded-lg overflow-hidden border border-white/10 hover:border-cyan-500/50 transition-all">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-blue-600 translate-y-[100%] group-hover:translate-y-[0%] transition-transform duration-300 ease-out"></div>
+                <span className="relative flex items-center gap-2 z-10">
+                  <Terminal size={18} /> View Projects
+                </span>
+              </a>
+              <a href="#contact" className="px-6 py-3 font-semibold text-slate-300 bg-white/5 rounded-lg border border-white/5 hover:bg-white/10 hover:text-white transition-all backdrop-blur-md flex items-center gap-2">
+                <Mail size={18} /> Contact Me
+              </a>
+            </div>
+          </div>
+          
+          {/* Subtle scroll indicator */}
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 animate-bounce">
+            <span className="text-xs font-mono tracking-widest text-slate-500">SCROLL</span>
+            <div className="w-[1px] h-12 bg-gradient-to-b from-cyan-500/50 to-transparent"></div>
+          </div>
+        </section>
+
+        {/* ABOUT & COMMUNITY SECTION */}
+        <GlassSection id="about">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <h2 className="text-3xl font-bold flex items-center gap-3 text-white">
+                <Cpu className="text-purple-500" /> System Specs (About)
+              </h2>
+              <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 backdrop-blur-md shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl group-hover:bg-cyan-500/20 transition-all duration-500"></div>
+                <p className="text-slate-400 leading-relaxed mb-4 relative z-10">
+                  I am an energetic and results-driven DevOps Engineer. My engineering philosophy revolves around an <strong className="text-cyan-400">automation-first mindset</strong>. I believe that if you have to do it twice, it should be scripted.
+                </p>
+                <p className="text-slate-400 leading-relaxed relative z-10">
+                  Backed by strong Linux fundamentals and robust networking knowledge, I build pipelines and infrastructure that are not just functional, but reliable and scalable. I am constantly expanding my practical exposure to modern cloud-native tools.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <h2 className="text-3xl font-bold flex items-center gap-3 text-white">
+                <Network className="text-blue-500" /> Community & Events
+              </h2>
+              <div className="p-1 rounded-2xl bg-gradient-to-b from-white/10 to-transparent">
+                <div className="p-6 rounded-xl bg-[#0a0a0f] h-full flex flex-col justify-center">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="p-3 bg-blue-500/10 rounded-lg text-blue-400 border border-blue-500/20">
+                      <Layers size={24} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-200">Google Developer Groups (GDG) Lahore</h3>
+                      <p className="text-sm text-slate-400 mt-1">Active Member & Contributor</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-500 leading-relaxed">
+                    Passionate about collaborative learning and open-source ecosystems. I actively participate in tech events and community meetups to stay at the bleeding edge of DevSecOps, cloud architecture, and modern automation practices.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </GlassSection>
+
+        {/* SKILLS SECTION */}
+        <GlassSection id="skills">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4 text-white inline-flex items-center gap-3">
+              <Code className="text-cyan-500" /> Technical Arsenal
+            </h2>
+            <p className="text-slate-400 max-w-2xl mx-auto">Core competencies and tools I use to bridge the gap between development and operations.</p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {skills.map((skill, index) => (
+              <div 
+                key={index} 
+                className="group p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:border-cyan-500/30 hover:bg-cyan-950/20 transition-all duration-300 hover:-translate-y-1 cursor-default flex flex-col items-center gap-3 text-center"
+              >
+                <div className="text-slate-500 group-hover:text-cyan-400 transition-colors drop-shadow-lg">
+                  {skill.icon}
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-200">{skill.name}</h4>
+                  <span className="text-[10px] uppercase tracking-wider text-slate-600 font-mono mt-1 block">{skill.category}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </GlassSection>
+
+        {/* PROJECTS SECTION */}
+        <GlassSection id="projects">
+          <div className="mb-12 flex items-end justify-between">
+            <div>
+              <h2 className="text-3xl font-bold mb-2 text-white flex items-center gap-3">
+                <Terminal className="text-green-500" /> Production Log (Projects)
+              </h2>
+              <p className="text-slate-400">Practical implementations demonstrating engineering capability.</p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {projects.map((project, i) => (
+              <div key={i} className="flex flex-col bg-[#0B0B13] rounded-xl border border-white/5 overflow-hidden group hover:border-blue-500/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(59,130,246,0.1)]">
+                <TerminalHeader />
+                <div className="p-6 flex-1 flex flex-col">
+                  <h3 className="text-lg font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">
+                    {project.title}
+                  </h3>
+                  
+                  <div className="mb-4">
+                    <span className="text-xs font-mono text-purple-400 block mb-1">Problem:</span>
+                    <p className="text-sm text-slate-400">{project.problem}</p>
+                  </div>
+                  
+                  <div className="mb-6 flex-1">
+                    <span className="text-xs font-mono text-green-400 block mb-1">Outcome:</span>
+                    <p className="text-sm text-slate-300 font-medium">{project.outcome}</p>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-white/5 flex flex-wrap gap-2 mt-auto">
+                    {project.stack.map((tech, j) => (
+                      <span key={j} className="px-2 py-1 text-[10px] font-mono rounded bg-white/5 text-slate-400 border border-white/5 group-hover:border-white/10">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </GlassSection>
+
+        {/* CONTACT SECTION */}
+        <GlassSection id="contact" className="pb-32">
+          <div className="bg-slate-900/40 border border-white/10 rounded-2xl p-8 md:p-12 backdrop-blur-xl relative overflow-hidden">
+            {/* Background glow for form */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-r from-cyan-900/20 to-purple-900/20 blur-[100px] pointer-events-none"></div>
+            
+            <div className="grid md:grid-cols-2 gap-12 relative z-10">
+              <div>
+                <h2 className="text-3xl font-bold mb-2 text-white">Initialize Connection</h2>
+                <p className="text-slate-400 mb-8">Looking for a dedicated DevOps Engineer to optimize your infrastructure? Let's connect and build resilient systems together.</p>
+                
+                <div className="space-y-6 font-mono text-sm">
+                  <a href="mailto:mfurqandev.eng555@gmail.com" className="flex items-center gap-4 text-slate-300 hover:text-cyan-400 transition-colors group">
+                    <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-cyan-500/10 group-hover:border-cyan-500/30 transition-all">
+                      <Mail size={18} />
+                    </div>
+                    mfurqandev.eng555@gmail.com
+                  </a>
+                  <a href="tel:03708066692" className="flex items-center gap-4 text-slate-300 hover:text-cyan-400 transition-colors group">
+                    <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-cyan-500/10 group-hover:border-cyan-500/30 transition-all">
+                      <Phone size={18} />
+                    </div>
+                    0370-8066692
+                  </a>
+                  <a href="https://github.com/mfurqandev" target="_blank" rel="noreferrer" className="flex items-center gap-4 text-slate-300 hover:text-cyan-400 transition-colors group">
+                    <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-cyan-500/10 group-hover:border-cyan-500/30 transition-all">
+                      <Github size={18} />
+                    </div>
+                    github.com/mfurqandev
+                  </a>
+                  <a href="https://www.linkedin.com/in/muhammad-furqan-0a64632a5" target="_blank" rel="noreferrer" className="flex items-center gap-4 text-slate-300 hover:text-cyan-400 transition-colors group">
+                    <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-cyan-500/10 group-hover:border-cyan-500/30 transition-all">
+                      <Linkedin size={18} />
+                    </div>
+                    LinkedIn Profile
+                  </a>
+                  <div className="flex items-center gap-4 text-slate-500 pt-4">
+                    <MapPin size={18} />
+                    <span>Lahore, Pakistan</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative / Functional Form */}
+              <form 
+                onSubmit={(e) => { e.preventDefault(); alert("Packet sent! (Form demonstration)"); }}
+                className="space-y-4 bg-[#05050A]/50 p-6 rounded-xl border border-white/5"
+              >
+                <div className="flex items-center gap-2 mb-4 text-xs font-mono text-slate-500">
+                  <Activity size={14} className="text-green-500" /> Form Status: Ready
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 mb-1">name.string()</label>
+                  <input type="text" required className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-cyan-500/50 focus:bg-white/10 transition-all placeholder:text-slate-600" placeholder="Enter your name" />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 mb-1">email.address()</label>
+                  <input type="email" required className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-cyan-500/50 focus:bg-white/10 transition-all placeholder:text-slate-600" placeholder="Enter your email" />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 mb-1">message.text()</label>
+                  <textarea required rows="4" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-cyan-500/50 focus:bg-white/10 transition-all placeholder:text-slate-600 resize-none" placeholder="Initiate handshake..."></textarea>
+                </div>
+                <button type="submit" className="w-full bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500 hover:text-white py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 group">
+                  Execute Transmission <Send size={16} className="group-hover:translate-x-1 transition-transform" />
+                </button>
+              </form>
+            </div>
+          </div>
+        </GlassSection>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-white/5 bg-[#05050A] py-8 text-center">
+        <p className="text-sm text-slate-600 font-mono">
+          &copy; {new Date().getFullYear()} Muhammad Furqan. Built with React & Tailwind.
+        </p>
+        <p className="text-xs text-slate-700 mt-2 font-mono">
+          Status: Operational | 200 OK
+        </p>
+      </footer>
+    </div>
+  );
+}
